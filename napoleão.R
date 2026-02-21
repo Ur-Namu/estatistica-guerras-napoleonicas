@@ -23,14 +23,14 @@ print(resumo_escala)
 
 cat("\nDesvio Padrão: ", sd(napoleao$Lehmann.Zhukov.Scale, na.rm=TRUE), "\n")
 
-# Histograma (Aqui a curva deve ficar bem mais desenhada que na Franco-Prussiana)
+# Histograma
 png("2_napoleao_histograma.png")
 hist(napoleao$Lehmann.Zhukov.Scale, 
      main="Distribuição de Tamanho das Batalhas (Napoleão)", 
      xlab="Escala L-Z (1 a 5)", ylab="Frequência", col="steelblue")
 dev.off()
 
-# Box-plot (Excelente para ver batalhas gigantescas como Waterloo ou Austerlitz como outliers)
+# Box-plot
 png("3_napoleao_boxplot.png")
 boxplot(napoleao$Lehmann.Zhukov.Scale, main="Box-plot: Escala de Batalhas Napoleônicas", col="tomato")
 dev.off()
@@ -38,24 +38,28 @@ dev.off()
 # --- PASSO 4: CORRELAÇÃO (ANO vs. ESCALA) ---
 cat("\n--- PASSO 4: ANÁLISE DE CORRELAÇÃO (ANO vs. ESCALA) ---\n")
 
-# AJUSTE TÉCNICO: Converte o Ano para número (pegando os primeiros 4 caracteres)
-# Isso resolve o problema de anos como "1806-1807"
+# 1. Limpeza dos anos (pega apenas os 4 primeiros dígitos)
 napoleao$Year <- as.numeric(substr(as.character(napoleao$Year), 1, 4))
-napoleao$Lehmann.Zhukov.Scale <- as.numeric(as.character(napoleao$Lehmann.Zhukov.Scale))
 
-# Agora o cálculo da correlação vai funcionar!
-correlacao <- cor(napoleao$Year, napoleao$Lehmann.Zhukov.Scale, use="complete.obs")
-cat("Coeficiente de Correlação de Pearson:", correlacao, "\n")
+
+napoleao_limpo <- subset(napoleao, Year >= 1800 & Year <= 1815)
+
+
+correlacao <- cor(napoleao_limpo$Year, napoleao_limpo$Lehmann.Zhukov.Scale, use="complete.obs")
+cat("Coeficiente de Correlação de Pearson (1800-1815):", correlacao, "\n")
+
 
 png("passo4_dispersao_ano_escala.png", width=800, height=600)
-plot(napoleao$Year, napoleao$Lehmann.Zhukov.Scale,
-     main="Evolução da Intensidade das Batalhas (1803-1815)",
+plot(napoleao_limpo$Year, napoleao_limpo$Lehmann.Zhukov.Scale,
+     main="Evolução da Intensidade das Batalhas (1800-1815)",
      xlab="Ano do Conflito", 
      ylab="Escala da Batalha (1-5)", 
-     pch=16, col=rgb(0, 0, 0.5, 0.2)) 
+     xlim=c(1800, 1815),  
+     pch=16, 
+     col=rgb(0, 0, 0.5, 0.3)) 
 
-# Adiciona a linha de tendência (opcional, mas os professores amam)
-abline(lm(Lehmann.Zhukov.Scale ~ Year, data=napoleao), col="red", lwd=2) 
+# Linha de tendência vermelha
+abline(lm(Lehmann.Zhukov.Scale ~ Year, data=napoleao_limpo), col="red", lwd=2) 
 dev.off()
 
 cat("\nGráficos de Napoleão gerados com sucesso!\n")
